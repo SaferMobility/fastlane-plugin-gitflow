@@ -14,6 +14,14 @@ module Fastlane
         found_files[0]
       end
 
+      def self.find_package_json(folder)
+        path = File.join(folder, 'package.json')
+
+        UI.user_error!("Unable to find `package.json` in the #{folder == '.' ? 'chosen' : 'current'} directory") unless File.exist?(path)
+
+        path
+      end
+
       def self.update_by_regex(filename, field_name, pattern, dry_run = false)
         UI.user_error!("Cannot find file '#{filename}'") unless File.exist?(filename)
         file_content = File.read(filename)
@@ -62,6 +70,12 @@ module Fastlane
           year = now.strftime("%y")
           month = now.strftime("%m")
           release_in_month = 0
+
+          # Node.js drops leading zeros in versions
+          if split_version[1].length == 1 then
+            split_version[1] = "0#{split_version[1]}"
+          end
+
           if year == split_version[0] && month == split_version[1] then
             release_in_month = (split_version[2] || 0).to_i + 1
           end
